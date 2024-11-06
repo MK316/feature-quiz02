@@ -34,13 +34,13 @@ def load_new_symbol():
     feature, _ = random.choice(list(features.items()))
     return symbol, feature
 
+if 'current_symbol' not in st.session_state or 'current_feature' not in st.session_state:
+    st.session_state.current_symbol, st.session_state.current_feature = load_new_symbol()
+
 if 'score' not in st.session_state:
     st.session_state.score = 0
 if 'attempts' not in st.session_state:
     st.session_state.attempts = 0
-
-if 'current_symbol' not in st.session_state or 'current_feature' not in st.session_state:
-    st.session_state.current_symbol, st.session_state.current_feature = load_new_symbol()
 
 st.title("Click the feature of the symbol")
 st.header(f"Symbol: {st.session_state.current_symbol}")
@@ -53,7 +53,6 @@ with col1:
 with col2:
     guess_negative = st.button(f"[-{st.session_state.current_feature}]")
 
-# Handle guesses
 if guess_positive or guess_negative:
     actual_value = ipa_features[st.session_state.current_symbol][st.session_state.current_feature]
     st.session_state.attempts += 1  # Increment attempts
@@ -62,12 +61,16 @@ if guess_positive or guess_negative:
         st.session_state.score += 1
     else:
         feedback = "Incorrect!"
-    st.info(feedback)
+    st.session_state.feedback = feedback  # Store feedback in session state
 
-# Next symbol button
+# Optionally clear feedback and load new symbol
 if st.button("Next Symbol"):
     st.session_state.current_symbol, st.session_state.current_feature = load_new_symbol()
-    st.experimental_rerun()
+    st.session_state.feedback = ""  # Clear feedback
+
+# Display feedback if it exists
+if 'feedback' in st.session_state and st.session_state.feedback:
+    st.info(st.session_state.feedback)
 
 # Display score and attempts
 st.write(f"Score: {st.session_state.score}")
