@@ -41,20 +41,20 @@ if 'attempts' not in st.session_state:
     st.session_state.attempts = 0
 
 # Select a random symbol and a random feature to ask about
-symbol = random.choice(list(ipa_features.keys()))
-feature = random.choice(list(ipa_features[symbol].keys()))
+symbol, features = random.choice(list(ipa_features.items()))
+feature, value = random.choice(list(features.items()))
 
 # Display the symbol and question
 st.subheader(f"Symbol: {symbol}")
-question = f"Is the '{feature}' feature of this symbol '+' or '-'?"
+question = f"Does the '{feature}' feature of this symbol have a positive or negative value?"
 st.write(question)
 
 # Buttons for user to guess the feature value
 col1, col2 = st.columns(2)
 with col1:
-    if st.button("+feature"):
+    if st.button(f"[+{feature}]"):
         # Check if user's guess is correct
-        if ipa_features[symbol][feature] == '+':
+        if value == '+':
             st.success("Correct!")
             st.session_state.score += 1
         else:
@@ -62,8 +62,8 @@ with col1:
         st.session_state.attempts += 1
 
 with col2:
-    if st.button("-feature"):
-        if ipa_features[symbol][feature] == '-':
+    if st.button(f"[-{feature}]"):
+        if value == '-':
             st.success("Correct!")
             st.session_state.score += 1
         else:
