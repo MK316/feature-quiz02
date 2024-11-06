@@ -29,11 +29,15 @@ ipa_features = {
     'w': {'syllabic': '-', 'consonantal': '-', 'sonorant': '+', 'coronal': '-', 'anterior': '-', 'continuant': '+', 'nasal': '-', 'strident': '-', 'lateral': '-', 'delayed release': '-', 'voice': '+'}
 }
 
-# Initialize session state for current symbol and feature if not already present
-if 'current_symbol' not in st.session_state or 'current_feature' not in st.session_state:
-    st.session_state.current_symbol, st.session_state.current_feature = random.choice(list(ipa_features.items()))
+def load_new_symbol():
+    symbol, features = random.choice(list(ipa_features.items()))
+    feature, _ = random.choice(list(features.items()))
+    return symbol, feature
 
-# Initialize or reset score and attempts
+# Initialize session state for the symbol and feature if not already set
+if 'current_symbol' not in st.session_state or 'current_feature' not in st.session_state:
+    st.session_state.current_symbol, st.session_state.current_feature = load_new_symbol()
+
 if 'score' not in st.session_state:
     st.session_state.score = 0
 if 'attempts' not in st.session_state:
@@ -45,30 +49,35 @@ st.title("Click the feature of the symbol")
 st.header(f"Symbol: {st.session_state.current_symbol}")
 st.subheader(f"Does the '{st.session_state.current_feature}' feature of this symbol have a positive or negative value?")
 
-# Handle guess response
-def handle_guess(is_positive):
-    if not st.session_state.answered:
-        actual_value = ipa_features[st.session_state.current_symbol][st.session_state.current_feature]
-        if (is_positive and actual_value == '+') or (not is_positive and actual_value == '-'):
-            st.success("Correct!")
-            st.session_state.score += 1
-        else:
-            st.error("Incorrect!")
-        st.session_state.attempts += 1
-        st.session_state.answered = True
-
+# Interaction for guessing
 col1, col2 = st.columns(2)
 with col1:
-    if st.button(f"[+{st.session_state.current_feature}]"):
-        handle_guess(True)
+    if st.button(f"+{st.session_state.current_feature}"):
+        is_positive = ipa_features[st.session_state.current_symbol][st.session_state.current_feature] == '+'
+        if not st.session_state.answered:
+            st.session_state.attempts += 1
+            if is_positive:
+                st.success("Correct!")
+                st.session_state.score += 1
+            else:
+                st.error("Incorrect!")
+            st.session_state.answered = True
 with col2:
-    if st.button(f"[-{st.session_state.current_feature}]"):
-        handle_guess(False)
+    if st.button(f"-{st.session_state.current_feature}"):
+        is_negative = ipa_features[st.session_state.current_symbol][st.session_state.current_feature] == '-'
+        if not st.session_state.answered:
+            st.session_state.attempts += 1
+            if is_negative:
+                st.success("Correct!")
+                st.session_state.score += 1
+            else:
+                st.error("Incorrect!")
+            st.session_state.answered = True
 
-# Next symbol button only changes the symbol and resets the answered flag
+# Next symbol button
 if st.button("Next Symbol"):
-    st.session_state.current_symbol, st.session_state.current_feature = random.choice(list(ipa_features.items()))
-    st.session_state.answered = False  # Reset the flag to allow answering for the new symbol
+    st.session_state.current_symbol, st.session_state.current_feature = load_new_symbol()
+    st.session_state.answered = False  # Reset the answered flag for the new symbol
 
 # Display score and attempts
 st.write(f"Score: {st.session_state.score}")
