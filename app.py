@@ -30,67 +30,99 @@ ipa_features = {
 }
 
 
-# Function to load a new symbol and feature
-def load_new_symbol():
-    symbol, features = random.choice(list(ipa_features.items()))
-    feature = random.choice(list(features.keys()))
-    return symbol, feature
 
-# Initialize session state
-if 'current_symbol' not in st.session_state or 'current_feature' not in st.session_state:
-    st.session_state.current_symbol, st.session_state.current_feature = load_new_symbol()
-
+# Initialize session state variables
+if 'started' not in st.session_state:
+    st.session_state.started = False
+if 'current_symbol' not in st.session_state:
+    st.session_state.current_symbol = None
+if 'current_feature' not in st.session_state:
+    st.session_state.current_feature = None
 if 'score' not in st.session_state:
     st.session_state.score = 0
 if 'attempts' not in st.session_state:
     st.session_state.attempts = 0
-if 'answered' not in st.session_state:
-    st.session_state.answered = False
 if 'feedback' not in st.session_state:
     st.session_state.feedback = ""
+if 'completed_symbols' not in st.session_state:
+    st.session_state.completed_symbols = set()
+if 'remaining_features' not in st.session_state:
+    st.session_state.remaining_features = []
 
-st.title("Click the feature of the symbol")
-st.header(f"Symbol: {st.session_state.current_symbol}")
-st.subheader(f"Does the '{st.session_state.current_feature}' feature of this symbol have a positive or negative value?")
-
-# Feature selection buttons
-col1, col2 = st.columns(2)
-
-with col1:
-    if st.button(f"[+{st.session_state.current_feature}]") and not st.session_state.answered:
-        actual_value = ipa_features[st.session_state.current_symbol][st.session_state.current_feature]
-        st.session_state.attempts += 1
-        if actual_value == '+':
-            st.session_state.score += 1
-            st.session_state.feedback = "Correct!"
-        else:
-            st.session_state.feedback = "Incorrect!"
-        st.session_state.answered = True
-
-with col2:
-    if st.button(f"[-{st.session_state.current_feature}]") and not st.session_state.answered:
-        actual_value = ipa_features[st.session_state.current_symbol][st.session_state.current_feature]
-        st.session_state.attempts += 1
-        if actual_value == '-':
-            st.session_state.score += 1
-            st.session_state.feedback = "Correct!"
-        else:
-            st.session_state.feedback = "Incorrect!"
-        st.session_state.answered = True
-
-# Display feedback if available
-if st.session_state.feedback:
-    if "Correct" in st.session_state.feedback:
-        st.success(st.session_state.feedback)
-    else:
-        st.error(st.session_state.feedback)
-
-# Button for next symbol
-if st.button("Next Symbol"):
-    st.session_state.current_symbol, st.session_state.current_feature = load_new_symbol()
+# Function to start or reset the quiz
+def start_quiz():
+    st.session_state.started = True
+    st.session_state.score = 0
+    st.session_state.attempts = 0
+    st.session_state.completed_symbols = set()
+    st.session_state.current_symbol, st.session_state.remaining_features = select_new_symbol()
     st.session_state.feedback = ""
-    st.session_state.answered = False
 
-# Display score and attempts
-st.write(f"Score: {st.session_state.score}")
-st.write(f"Attempts: {st.session_state.attempts}")
+# Function to select a new symbol that hasn't been completed yet
+def select_new_symbol():
+    available_symbols = [symbol for symbol in ipa_features.keys() if symbol not in st.session_state.completed_symbols]
+    if not available_symbols:
+        return None, []  # No symbols left to practice
+    symbol = random.choice(available_symbols)
+    features = list(ipa_features[symbol].keys())
+    return symbol, features
+
+# Function to load the next feature for the current symbol
+def load_next_feature():
+    if st.session_state.remaining_features:
+        st.session_state.current_feature = st.session_state.remaining_features.pop(0)
+    else:
+        # Mark the current symbol as completed and select a new symbol
+        st.session_state.completed_symbols.add(st.session_state.current_symbol)
+        st.session_state.current_symbol, st.session_state.remaining_features = select_new_symbol()
+        if st.session_state.current_symbol:
+            st.session_state.current_feature = st.session_state.remaining_features.pop(0)
+        else:
+            st.session_state.feedback = "You've completed all the symbols!"
+
+# Start or Reset Button
+st.button("Start/Reset Quiz", on_click=start_quiz)
+
+# Check if the quiz has been started
+if st.session_state.started:
+    # Check if there are symbols left to practice
+    if st.session_state.current_symbol:
+        st.write(f"We'll practice with /{st.session_state.current_symbol}/ sound. Click to proceed.")
+
+        # Show feature options for the current feature
+        if st.session_state.current_feature:
+            feature = st.session_state.current_feature
+            correct_value = ipa_features[st.session_state.current_symbol][feature]
+            
+            st.write(f"Does the '{feature}' feature of /{st.session_state.current_symbol}/ have a positive or negative value?")
+            col1, col2 = st.columns(2)
+
+            # Option buttons for the feature
+            with col1:
+                if st.button(f"[+{feature}]"):
+                    st.session_state.attempts += 1
+                    if correct_value == '+':
+                        st.session_state.score += 1
+                        st.session_state.feedback = "Correct!"
+                    else:
+                        st.session_state.feedback = "Incorrect!"
+                    load_next_feature()
+            with col2:
+                if st.button(f"[-{feature}]"):
+                    st.session_state.attempts += 1
+                    if correct_value == '-':
+                        st.session_state.score += 1
+                        st.session_state.feedback = "Correct!"
+                    else:
+                        st.session_state.feedback = "Incorrect!"
+                    load_next_feature()
+
+            # Display feedback
+            if st.session_state.feedback:
+                st.write(st.session_state.feedback)
+
+            # Display score and attempts
+            st.write(f"Score: {st.session_state.score}")
+            st.write(f"Attempts: {st.session_state.attempts}")
+    else:
+        st.write("You've completed all the symbols!")
