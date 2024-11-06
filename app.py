@@ -30,6 +30,7 @@ ipa_features = {
 }
 
 
+
 # Initialize session state variables
 if 'started' not in st.session_state:
     st.session_state.started = False
@@ -47,6 +48,8 @@ if 'completed_symbols' not in st.session_state:
     st.session_state.completed_symbols = set()
 if 'remaining_features' not in st.session_state:
     st.session_state.remaining_features = []
+if 'answered' not in st.session_state:
+    st.session_state.answered = False
 
 # Function to start or reset the quiz
 def start_quiz():
@@ -55,6 +58,7 @@ def start_quiz():
     st.session_state.attempts = 0
     st.session_state.completed_symbols = set()
     st.session_state.feedback = ""
+    st.session_state.answered = False
     select_new_symbol()
 
 # Function to select a new symbol and reset its features
@@ -68,16 +72,19 @@ def select_new_symbol():
         st.session_state.remaining_features = list(ipa_features[st.session_state.current_symbol].keys())
         st.session_state.current_feature = st.session_state.remaining_features.pop(0)
         st.session_state.feedback = ""
+        st.session_state.answered = False  # Reset answered flag for new feature
 
 # Function to handle answer checking
 def check_answer(user_choice):
-    correct_value = ipa_features[st.session_state.current_symbol][st.session_state.current_feature]
-    st.session_state.attempts += 1
-    if user_choice == correct_value:
-        st.session_state.score += 1
-        st.session_state.feedback = "Correct!"
-    else:
-        st.session_state.feedback = "Incorrect!"
+    if not st.session_state.answered:  # Only proceed if the feature hasn't been answered yet
+        correct_value = ipa_features[st.session_state.current_symbol][st.session_state.current_feature]
+        st.session_state.attempts += 1
+        if user_choice == correct_value:
+            st.session_state.score += 1
+            st.session_state.feedback = "Correct!"
+        else:
+            st.session_state.feedback = "Incorrect!"
+        st.session_state.answered = True  # Mark this feature as answered
 
 # Start/Reset Quiz Button
 if st.button("Start/Reset Quiz"):
@@ -90,14 +97,15 @@ if st.session_state.started:
         st.write(f"Practicing with /{st.session_state.current_symbol}/ sound.")
         st.write(f"Does the '{st.session_state.current_feature}' feature of /{st.session_state.current_symbol}/ have a positive or negative value?")
 
-        # Display answer buttons for the feature
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button(f"[+{st.session_state.current_feature}]"):
-                check_answer('+')
-        with col2:
-            if st.button(f"[-{st.session_state.current_feature}]"):
-                check_answer('-')
+        # Display answer buttons for the feature only if it hasn't been answered yet
+        if not st.session_state.answered:
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button(f"[+{st.session_state.current_feature}]"):
+                    check_answer('+')
+            with col2:
+                if st.button(f"[-{st.session_state.current_feature}]"):
+                    check_answer('-')
 
         # Display feedback
         if st.session_state.feedback:
@@ -108,17 +116,18 @@ if st.session_state.started:
         st.write(f"Attempts: {st.session_state.attempts}")
 
         # Button to proceed to the next feature or symbol
-        if st.session_state.feedback:
-            # Determine if there are more features for the current symbol
+        if st.session_state.answered:
             if st.session_state.remaining_features:
                 if st.button("Next Feature"):
                     st.session_state.current_feature = st.session_state.remaining_features.pop(0)
                     st.session_state.feedback = ""
+                    st.session_state.answered = False  # Reset answered flag for the new feature
             else:
                 # Mark symbol as completed and prepare for the next symbol
                 st.session_state.completed_symbols.add(st.session_state.current_symbol)
                 if st.button("Next Symbol"):
                     select_new_symbol()
                     st.session_state.feedback = ""
+                    st.session_state.answered = False  # Reset for the next symbol
     else:
         st.write("You've completed all the symbols!")
