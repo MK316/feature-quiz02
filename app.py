@@ -32,11 +32,11 @@ ipa_features = {
 # Function to load a new symbol and feature
 def load_new_symbol():
     symbol, features = random.choice(list(ipa_features.items()))
-    feature, _ = random.choice(list(features.items()))
+    feature = random.choice(list(features.keys()))
     return symbol, feature
 
 # Initialize session state for symbol, feature, and other state variables
-if 'current_symbol' not in st.session_state or 'current_feature' not in st.session_state:
+if 'current_symbol' not in st.session_state:
     st.session_state.current_symbol, st.session_state.current_feature = load_new_symbol()
 
 if 'score' not in st.session_state:
@@ -46,39 +46,40 @@ if 'attempts' not in st.session_state:
 if 'answered' not in st.session_state:
     st.session_state.answered = False
 
+# Display title and question
 st.title("Click the feature of the symbol")
 st.header(f"Symbol: {st.session_state.current_symbol}")
-feature_question = f"Does the '{st.session_state.current_feature}' feature of this symbol have a positive or negative value?"
-st.subheader(feature_question)
+st.subheader(f"Does the '{st.session_state.current_feature}' feature of this symbol have a positive or negative value?")
 
-# Columns for option buttons
+# Function to handle user's answer
+def handle_answer(user_choice):
+    if not st.session_state.answered:
+        actual_value = ipa_features[st.session_state.current_symbol][st.session_state.current_feature]
+        st.session_state.attempts += 1
+        if user_choice == actual_value:
+            st.session_state.score += 1
+            st.success("Correct!")
+        else:
+            st.error("Incorrect!")
+        st.session_state.answered = True
+
+# Columns for the buttons
 col1, col2 = st.columns(2)
-with col1:
-    if st.button(f"+{st.session_state.current_feature}"):
-        if not st.session_state.answered:
-            if ipa_features[st.session_state.current_symbol][st.session_state.current_feature] == '+':
-                st.success("Correct!")
-                st.session_state.score += 1
-            else:
-                st.error("Incorrect!")
-            st.session_state.attempts += 1
-            st.session_state.answered = True
 
+# Feature selection buttons
+with col1:
+    if st.button(f"[+{st.session_state.current_feature}]"):
+        handle_answer('+')
 with col2:
-    if st.button(f"-{st.session_state.current_feature}"):
-        if not st.session_state.answered:
-            if ipa_features[st.session_state.current_symbol][st.session_state.current_feature] == '-':
-                st.success("Correct!")
-                st.session_state.score += 1
-            else:
-                st.error("Incorrect!")
-            st.session_state.attempts += 1
-            st.session_state.answered = True
+    if st.button(f"[-{st.session_state.current_feature}]"):
+        handle_answer('-')
 
 # Button for next symbol
 if st.button("Next Symbol"):
+    # Load a new symbol and reset the answered state
     st.session_state.current_symbol, st.session_state.current_feature = load_new_symbol()
-    st.session_state.answered = False  # Allow new answers
+    st.session_state.answered = False
+    st.experimental_rerun()  # Force a rerun to update the UI with the new symbol
 
 # Display score and attempts
 st.write(f"Score: {st.session_state.score}")
