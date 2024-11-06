@@ -34,9 +34,16 @@ ipa_features = {
 st.title("Distinctive Features Quiz")
 st.header("Click the feature of the symbol")
 
-# Function to initialize or reset session state
-def init_session_state():
-    if 'symbol' not in st.session_state or 'feature' not in st.session_state:
+def initialize_or_reset_state():
+    # Select a random symbol and a random feature to ask about
+    if 'reset' in st.session_state and st.session_state.reset:
+        symbol, features = random.choice(list(ipa_features.items()))
+        feature, value = random.choice(list(features.items()))
+        st.session_state.symbol = symbol
+        st.session_state.feature = feature
+        st.session_state.value = value
+        st.session_state.reset = False  # Reset the flag
+    elif 'symbol' not in st.session_state:
         symbol, features = random.choice(list(ipa_features.items()))
         feature, value = random.choice(list(features.items()))
         st.session_state.symbol = symbol
@@ -48,8 +55,7 @@ def init_session_state():
     if 'attempts' not in st.session_state:
         st.session_state.attempts = 0
 
-# Initialize or reset session state
-init_session_state()
+initialize_or_reset_state()
 
 # Display the symbol and question
 symbol = st.session_state.symbol
@@ -60,14 +66,13 @@ st.subheader(f"Symbol: {symbol}")
 question = f"Does the '{feature}' feature of this symbol have a positive or negative value?"
 st.write(question)
 
-# Buttons for user to guess the feature value
+# User interaction for guessing the feature
 col1, col2 = st.columns(2)
 with col1:
     guess_positive = st.button(f"[+{feature}]")
 with col2:
     guess_negative = st.button(f"[-{feature}]")
 
-# Process the user's guess
 if guess_positive or guess_negative:
     st.session_state.attempts += 1  # Increment attempts
     if (guess_positive and value == '+') or (guess_negative and value == '-'):
@@ -78,9 +83,8 @@ if guess_positive or guess_negative:
 
 # Button to reload for a new question
 if st.button("Next Symbol"):
-    st.session_state.pop('symbol', None)  # Reset symbol and feature for new question
-    init_session_state()  # Reinitialize state
-    st.experimental_rerun()
+    st.session_state.reset = True  # Set flag to trigger reset in the state initialization
+    st.experimental_rerun()  # Rerun the app to refresh with new symbol and feature
 
 # Display score and number of attempts
 st.write(f"Score: {st.session_state.score}")
