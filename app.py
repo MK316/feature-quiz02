@@ -31,8 +31,8 @@ ipa_features = {
 
 
 # Streamlit app setup
-st.title("IPA Features Quiz")
-st.header("Guess the feature of the symbol")
+st.title("Distinctive Features Quiz")
+st.header("Click the feature of the symbol")
 
 # State management to keep track of scores and attempts
 if 'score' not in st.session_state:
@@ -52,28 +52,25 @@ st.write(question)
 # Buttons for user to guess the feature value
 col1, col2 = st.columns(2)
 with col1:
-    if st.button(f"[+{feature}]"):
-        # Check if user's guess is correct
-        if value == '+':
-            st.success("Correct!")
-            st.session_state.score += 1
-        else:
-            st.error("Incorrect!")
-        st.session_state.attempts += 1
-
+    guess_positive = st.button(f"[+{feature}]")
 with col2:
-    if st.button(f"[-{feature}]"):
-        if value == '-':
-            st.success("Correct!")
-            st.session_state.score += 1
-        else:
-            st.error("Incorrect!")
-        st.session_state.attempts += 1
+    guess_negative = st.button(f"[-{feature}]")
 
-# Display score and number of attempts
-st.write(f"Score: {st.session_state.score}")
-st.write(f"Attempts: {st.session_state.attempts}")
+if guess_positive or guess_negative:
+    # Increment attempts
+    st.session_state.attempts += 1
+
+    # Check user's guess
+    if (guess_positive and value == '+') or (guess_negative and value == '-'):
+        st.success("Correct!")
+        st.session_state.score += 1
+    else:
+        st.error("Incorrect!")
 
 # Button to reload for a new question
 if st.button("Next Symbol"):
     st.experimental_rerun()
+
+# Display score and number of attempts
+st.write(f"Score: {st.session_state.score}")
+st.write(f"Attempts: {st.session_state.attempts}")
