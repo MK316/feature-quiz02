@@ -36,7 +36,7 @@ def load_new_symbol():
     return symbol, feature
 
 # Initialize session state for symbol, feature, and other state variables
-if 'current_symbol' not in st.session_state:
+if 'current_symbol' not in st.session_state or 'current_feature' not in st.session_state:
     st.session_state.current_symbol, st.session_state.current_feature = load_new_symbol()
 
 if 'score' not in st.session_state:
@@ -46,7 +46,6 @@ if 'attempts' not in st.session_state:
 if 'answered' not in st.session_state:
     st.session_state.answered = False
 
-# Display title and question
 st.title("Click the feature of the symbol")
 st.header(f"Symbol: {st.session_state.current_symbol}")
 st.subheader(f"Does the '{st.session_state.current_feature}' feature of this symbol have a positive or negative value?")
@@ -58,28 +57,37 @@ def handle_answer(user_choice):
         st.session_state.attempts += 1
         if user_choice == actual_value:
             st.session_state.score += 1
-            st.success("Correct!")
+            st.session_state.feedback = "Correct!"
         else:
-            st.error("Incorrect!")
+            st.session_state.feedback = "Incorrect!"
         st.session_state.answered = True
-
-# Columns for the buttons
-col1, col2 = st.columns(2)
+    else:
+        st.session_state.feedback = "You have already answered. Please click 'Next Symbol' for a new question."
 
 # Feature selection buttons
+col1, col2 = st.columns(2)
+
 with col1:
     if st.button(f"[+{st.session_state.current_feature}]"):
         handle_answer('+')
+
 with col2:
     if st.button(f"[-{st.session_state.current_feature}]"):
         handle_answer('-')
+
+# Display feedback if available
+if 'feedback' in st.session_state and st.session_state.feedback:
+    if "Correct" in st.session_state.feedback:
+        st.success(st.session_state.feedback)
+    else:
+        st.error(st.session_state.feedback)
 
 # Button for next symbol
 if st.button("Next Symbol"):
     # Load a new symbol and reset the answered state
     st.session_state.current_symbol, st.session_state.current_feature = load_new_symbol()
     st.session_state.answered = False
-    st.experimental_rerun()  # Force a rerun to update the UI with the new symbol
+    st.session_state.feedback = ""  # Clear feedback for the new question
 
 # Display score and attempts
 st.write(f"Score: {st.session_state.score}")
