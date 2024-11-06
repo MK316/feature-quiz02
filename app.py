@@ -48,6 +48,8 @@ if 'completed_symbols' not in st.session_state:
     st.session_state.completed_symbols = set()
 if 'remaining_features' not in st.session_state:
     st.session_state.remaining_features = []
+if 'ready_for_next_symbol' not in st.session_state:
+    st.session_state.ready_for_next_symbol = False
 
 # Function to start or reset the quiz
 def start_quiz():
@@ -57,6 +59,7 @@ def start_quiz():
     st.session_state.completed_symbols = set()
     st.session_state.current_symbol, st.session_state.remaining_features = select_new_symbol()
     st.session_state.feedback = ""
+    st.session_state.ready_for_next_symbol = False
 
 # Function to select a new symbol that hasn't been completed yet
 def select_new_symbol():
@@ -72,13 +75,9 @@ def load_next_feature():
     if st.session_state.remaining_features:
         st.session_state.current_feature = st.session_state.remaining_features.pop(0)
     else:
-        # Mark the current symbol as completed and select a new symbol
+        # Mark the current symbol as completed and enable "Next Symbol" button
         st.session_state.completed_symbols.add(st.session_state.current_symbol)
-        st.session_state.current_symbol, st.session_state.remaining_features = select_new_symbol()
-        if st.session_state.current_symbol:
-            st.session_state.current_feature = st.session_state.remaining_features.pop(0)
-        else:
-            st.session_state.feedback = "You've completed all the symbols!"
+        st.session_state.ready_for_next_symbol = True
 
 # Start or Reset Button
 st.button("Start/Reset Quiz", on_click=start_quiz)
@@ -99,7 +98,7 @@ if st.session_state.started:
 
             # Option buttons for the feature
             with col1:
-                if st.button(f"[+{feature}]"):
+                if st.button(f"[+{feature}]") and not st.session_state.ready_for_next_symbol:
                     st.session_state.attempts += 1
                     if correct_value == '+':
                         st.session_state.score += 1
@@ -108,7 +107,7 @@ if st.session_state.started:
                         st.session_state.feedback = "Incorrect!"
                     load_next_feature()
             with col2:
-                if st.button(f"[-{feature}]"):
+                if st.button(f"[-{feature}]") and not st.session_state.ready_for_next_symbol:
                     st.session_state.attempts += 1
                     if correct_value == '-':
                         st.session_state.score += 1
@@ -124,5 +123,16 @@ if st.session_state.started:
             # Display score and attempts
             st.write(f"Score: {st.session_state.score}")
             st.write(f"Attempts: {st.session_state.attempts}")
+
+            # Show "Next Symbol" button only when all features of the current symbol are completed
+            if st.session_state.ready_for_next_symbol:
+                if st.button("Next Symbol"):
+                    st.session_state.current_symbol, st.session_state.remaining_features = select_new_symbol()
+                    st.session_state.feedback = ""
+                    st.session_state.ready_for_next_symbol = False
+                    if st.session_state.remaining_features:
+                        st.session_state.current_feature = st.session_state.remaining_features.pop(0)
+                    else:
+                        st.session_state.feedback = "You've completed all the symbols!"
     else:
         st.write("You've completed all the symbols!")
