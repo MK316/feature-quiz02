@@ -30,7 +30,6 @@ ipa_features = {
 }
 
 
-
 # Initialize session state variables
 if 'started' not in st.session_state:
     st.session_state.started = False
@@ -57,9 +56,12 @@ def start_quiz():
     st.session_state.score = 0
     st.session_state.attempts = 0
     st.session_state.completed_symbols = set()
-    st.session_state.current_symbol, st.session_state.remaining_features = select_new_symbol()
     st.session_state.feedback = ""
     st.session_state.ready_for_next_symbol = False
+    # Select a new symbol and load its first feature
+    st.session_state.current_symbol, st.session_state.remaining_features = select_new_symbol()
+    if st.session_state.remaining_features:
+        st.session_state.current_feature = st.session_state.remaining_features.pop(0)
 
 # Function to select a new symbol that hasn't been completed yet
 def select_new_symbol():
