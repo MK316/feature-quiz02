@@ -29,13 +29,14 @@ ipa_features = {
     'w': {'syllabic': '-', 'consonantal': '-', 'sonorant': '+', 'coronal': '-', 'anterior': '-', 'continuant': '+', 'nasal': '-', 'strident': '-', 'lateral': '-', 'delayed release': '-', 'voice': '+'}
 }
 
+
 # Function to load a new symbol and feature
 def load_new_symbol():
     symbol, features = random.choice(list(ipa_features.items()))
     feature = random.choice(list(features.keys()))
     return symbol, feature
 
-# Initialize session state variables
+# Initialize session state
 if 'current_symbol' not in st.session_state or 'current_feature' not in st.session_state:
     st.session_state.current_symbol, st.session_state.current_feature = load_new_symbol()
 
@@ -43,43 +44,48 @@ if 'score' not in st.session_state:
     st.session_state.score = 0
 if 'attempts' not in st.session_state:
     st.session_state.attempts = 0
-if 'feedback' not in st.session_state:
-    st.session_state.feedback = ""
 if 'answered' not in st.session_state:
     st.session_state.answered = False
+if 'feedback' not in st.session_state:
+    st.session_state.feedback = ""
 
 st.title("Click the feature of the symbol")
 st.header(f"Symbol: {st.session_state.current_symbol}")
 st.subheader(f"Does the '{st.session_state.current_feature}' feature of this symbol have a positive or negative value?")
 
-# Create a form for interaction
-with st.form(key="feature_form"):
-    col1, col2 = st.columns(2)
-    with col1:
-        positive_choice = st.form_submit_button(f"[+{st.session_state.current_feature}]")
-    with col2:
-        negative_choice = st.form_submit_button(f"[-{st.session_state.current_feature}]")
-    
-    # Handle user's answer
-    if positive_choice or negative_choice:
-        if not st.session_state.answered:
-            actual_value = ipa_features[st.session_state.current_symbol][st.session_state.current_feature]
-            st.session_state.attempts += 1
-            if (positive_choice and actual_value == '+') or (negative_choice and actual_value == '-'):
-                st.session_state.feedback = "Correct!"
-                st.session_state.score += 1
-            else:
-                st.session_state.feedback = "Incorrect!"
-            st.session_state.answered = True
+# Feature selection buttons
+col1, col2 = st.columns(2)
 
-# Display feedback
+with col1:
+    if st.button(f"[+{st.session_state.current_feature}]") and not st.session_state.answered:
+        actual_value = ipa_features[st.session_state.current_symbol][st.session_state.current_feature]
+        st.session_state.attempts += 1
+        if actual_value == '+':
+            st.session_state.score += 1
+            st.session_state.feedback = "Correct!"
+        else:
+            st.session_state.feedback = "Incorrect!"
+        st.session_state.answered = True
+
+with col2:
+    if st.button(f"[-{st.session_state.current_feature}]") and not st.session_state.answered:
+        actual_value = ipa_features[st.session_state.current_symbol][st.session_state.current_feature]
+        st.session_state.attempts += 1
+        if actual_value == '-':
+            st.session_state.score += 1
+            st.session_state.feedback = "Correct!"
+        else:
+            st.session_state.feedback = "Incorrect!"
+        st.session_state.answered = True
+
+# Display feedback if available
 if st.session_state.feedback:
     if "Correct" in st.session_state.feedback:
         st.success(st.session_state.feedback)
     else:
         st.error(st.session_state.feedback)
 
-# Next Symbol button to load a new question
+# Button for next symbol
 if st.button("Next Symbol"):
     st.session_state.current_symbol, st.session_state.current_feature = load_new_symbol()
     st.session_state.feedback = ""
