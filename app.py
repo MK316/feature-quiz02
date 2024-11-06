@@ -34,14 +34,11 @@ def load_new_symbol():
     feature, _ = random.choice(list(features.items()))
     return symbol, feature
 
-if 'feedback' not in st.session_state:
-    st.session_state.feedback = ""
 if 'score' not in st.session_state:
     st.session_state.score = 0
 if 'attempts' not in st.session_state:
     st.session_state.attempts = 0
 
-# Initialize or reset session state variables for symbol and feature
 if 'current_symbol' not in st.session_state or 'current_feature' not in st.session_state:
     st.session_state.current_symbol, st.session_state.current_feature = load_new_symbol()
 
@@ -49,33 +46,28 @@ st.title("Click the feature of the symbol")
 st.header(f"Symbol: {st.session_state.current_symbol}")
 st.subheader(f"Does the '{st.session_state.current_feature}' feature of this symbol have a positive or negative value?")
 
-# Feedback display
-if st.session_state.feedback:
-    if "Correct" in st.session_state.feedback:
-        st.success(st.session_state.feedback)
-    else:
-        st.error(st.session_state.feedback)
-
-# Interaction for guessing
+# Create columns for the [+feature] and [-feature] buttons
 col1, col2 = st.columns(2)
 with col1:
     guess_positive = st.button(f"[+{st.session_state.current_feature}]")
 with col2:
     guess_negative = st.button(f"[-{st.session_state.current_feature}]")
 
+# Handle guesses
 if guess_positive or guess_negative:
     actual_value = ipa_features[st.session_state.current_symbol][st.session_state.current_feature]
+    st.session_state.attempts += 1  # Increment attempts
     if (guess_positive and actual_value == '+') or (guess_negative and actual_value == '-'):
-        st.session_state.feedback = "Correct!"
+        feedback = "Correct!"
         st.session_state.score += 1
     else:
-        st.session_state.feedback = "Incorrect!"
-    st.session_state.attempts += 1
+        feedback = "Incorrect!"
+    st.info(feedback)
 
-# Button to manually load a new symbol
+# Next symbol button
 if st.button("Next Symbol"):
     st.session_state.current_symbol, st.session_state.current_feature = load_new_symbol()
-    st.session_state.feedback = ""  # Clear feedback on new symbol
+    st.experimental_rerun()
 
 # Display score and attempts
 st.write(f"Score: {st.session_state.score}")
