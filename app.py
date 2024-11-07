@@ -94,8 +94,8 @@ if st.button("Start/Reset Quiz"):
 if st.session_state.started:
     # Check if there are symbols left to practice
     if st.session_state.current_symbol:
-        st.write(f"Practicing with /{st.session_state.current_symbol}/ sound.")
-        st.write(f"Does the '{st.session_state.current_feature}' feature of /{st.session_state.current_symbol}/ have a positive or negative value?")
+        st.write(f"English phoneme: /{st.session_state.current_symbol}/.")
+        st.write(f"Q: [ {st.session_state.current_feature} ] feature?")
 
         # Display answer buttons for the feature only if it hasn't been answered yet
         if not st.session_state.answered:
@@ -118,7 +118,7 @@ if st.session_state.started:
         # Button to proceed to the next feature or symbol
         if st.session_state.answered:
             if st.session_state.remaining_features:
-                if st.button("Next Feature"):
+                if st.button("Click (twice) to see the next question"):
                     st.session_state.current_feature = st.session_state.remaining_features.pop(0)
                     st.session_state.feedback = ""
                     st.session_state.answered = False  # Reset answered flag for the new feature
