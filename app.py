@@ -94,8 +94,7 @@ if st.button("Start/Reset Quiz"):
 if st.session_state.started:
     # Check if there are symbols left to practice
     if st.session_state.current_symbol:
-        st.markdown(f"### ❄️ English phoneme: / {st.session_state.current_symbol} /.")
-        st.markdown(f"### Q: [ {st.session_state.current_feature} ] feature?")
+        st.markdown(f"### 🐬 Q: [ {st.session_state.current_feature} ] feature of {st.session_state.current_symbol} /?")
 
         # Display answer buttons for the feature only if it hasn't been answered yet
         if not st.session_state.answered:
