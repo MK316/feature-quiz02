@@ -130,4 +130,5 @@ if st.session_state.started:
                 if st.button(f"[+{st.session_state.current_feature}]", key="positive", help="Positive Feature", use_container_width=True, on_click=lambda: check_answer('+')):
                     st.session_state.feedback = check_answer('+')
             with col2:
-                if st.button(f"[-{st.session_state.current_feature}]", key="negative", help="Negative Feature", use_container_width=True,
+                if st.button(f"[-{st.session_state.current_feature}]", key="negative", help="Negative Feature", use_container_width=True, on_click=lambda: check_answer('-')):
+                    st.session_state.feedback = check_answer('-')
