@@ -89,7 +89,6 @@ def check_answer(user_choice):
 
 # Function to load the next feature or symbol in a single click
 def load_next_feature():
-    # Proceed only if a next feature is requested and the answer has been reviewed
     if st.session_state.next_requested:
         if st.session_state.remaining_features:
             st.session_state.current_feature = st.session_state.remaining_features.pop(0)
@@ -100,26 +99,23 @@ def load_next_feature():
             st.session_state.completed_symbols.add(st.session_state.current_symbol)
             select_new_symbol()
 
-# Function to create styled buttons with custom colors
-def create_button(label, color, action):
-    button_html = f"""
-    <button style="
-        background-color: {color}; 
-        color: white; 
-        padding: 10px 20px; 
-        margin: 5px; 
-        border: none; 
-        border-radius: 5px; 
-        cursor: pointer;
-        font-size: 16px;
-    ">{label}</button>
-    """
-    if st.markdown(button_html, unsafe_allow_html=True):
-        action()
-
 # Start/Reset Quiz Button
 if st.button("Start/Reset Quiz"):
     start_quiz()
+
+# Apply custom CSS for button colors
+st.markdown("""
+    <style>
+        .positive-button {
+            background-color: green !important;
+            color: white !important;
+        }
+        .negative-button {
+            background-color: red !important;
+            color: white !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
 # Quiz flow
 if st.session_state.started:
@@ -131,24 +127,7 @@ if st.session_state.started:
         if not st.session_state.answered:
             col1, col2 = st.columns([1, 1])
             with col1:
-                if st.markdown(f'<a href="javascript:void(0)" onclick="window.location.reload();"><button style="background-color: green; color: white; padding: 10px; border: none; border-radius: 5px;">[+{st.session_state.current_feature}]</button></a>', unsafe_allow_html=True):
-                    check_answer('+')
+                if st.button(f"[+{st.session_state.current_feature}]", key="positive", help="Positive Feature", use_container_width=True, on_click=lambda: check_answer('+')):
+                    st.session_state.feedback = check_answer('+')
             with col2:
-                if st.markdown(f'<a href="javascript:void(0)" onclick="window.location.reload();"><button style="background-color: red; color: white; padding: 10px; border: none; border-radius: 5px;">[-{st.session_state.current_feature}]</button></a>', unsafe_allow_html=True):
-                    check_answer('-')
-
-        # Display feedback
-        if st.session_state.feedback:
-            st.write(st.session_state.feedback)
-
-        # Display score and attempts
-        st.write(f"Score: {st.session_state.score}")
-        st.write(f"Attempts: {st.session_state.attempts}")
-
-        # Button to proceed to the next feature or symbol
-        if st.session_state.answered:
-            if st.button("Next Feature / Symbol"):
-                st.session_state.next_requested = True  # Mark next feature request
-                load_next_feature()  # Call load_next_feature to immediately update the question
-    else:
-        st.write("You've completed all the symbols!")
+                if st.button(f"[-{st.session_state.current_feature}]", key="negative", help="Negative Feature", use_container_width=True,
