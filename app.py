@@ -81,9 +81,9 @@ def check_answer(user_choice):
         st.session_state.attempts += 1
         if user_choice == correct_value:
             st.session_state.score += 1
-            st.session_state.feedback = "Correct!"
+            st.session_state.feedback = "😍 Correct!"
         else:
-            st.session_state.feedback = "Incorrect!"
+            st.session_state.feedback = "😓 Oh, no!"
         st.session_state.answered = True  # Mark this feature as answered
 
 # Start/Reset Quiz Button
@@ -94,7 +94,7 @@ if st.button("Start/Reset Quiz"):
 if st.session_state.started:
     # Check if there are symbols left to practice
     if st.session_state.current_symbol:
-        st.markdown(f"### 🎅 Q: Feature [ {st.session_state.current_feature} ] of / {st.session_state.current_symbol} /?")
+        st.markdown(f"### 🍃 Q: Feature [ {st.session_state.current_feature} ] of / {st.session_state.current_symbol} /?")
 
         # Display answer buttons for the feature only if it hasn't been answered yet
         if not st.session_state.answered:
