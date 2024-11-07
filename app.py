@@ -147,7 +147,7 @@ if st.session_state.started:
 
         # Button to proceed to the next feature or symbol
         if st.session_state.answered:
-            if st.button("➡️Next Question"):
+            if st.button("➡️ Next Question"):
                 load_next_feature()  # Call load_next_feature to immediately update the question
     else:
         st.write("You've completed all the symbols!")
