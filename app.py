@@ -98,7 +98,7 @@ if st.session_state.started:
 
         # Display answer buttons for the feature only if it hasn't been answered yet
         if not st.session_state.answered:
-            col1, col2, _ = st.columns([2, 2, 4])  # Reduce spacing between the columns by adjusting column widths
+            col1, col2, _ = st.columns([2, 2, 5])  # Reduce spacing between the columns by adjusting column widths
             with col1:
                 if st.button(f"[+{st.session_state.current_feature}]"):
                     check_answer('+')
