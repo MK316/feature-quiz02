@@ -89,15 +89,13 @@ def check_answer(user_choice):
 
 # Function to load the next feature or symbol in a single click
 def load_next_feature():
-    if st.session_state.next_requested:
-        if st.session_state.remaining_features:
-            st.session_state.current_feature = st.session_state.remaining_features.pop(0)
-            st.session_state.feedback = ""  # Clear feedback only when loading a new question
-            st.session_state.answered = False
-            st.session_state.next_requested = False  # Reset next request
-        else:
-            st.session_state.completed_symbols.add(st.session_state.current_symbol)
-            select_new_symbol()
+    if st.session_state.remaining_features:
+        st.session_state.current_feature = st.session_state.remaining_features.pop(0)
+        st.session_state.feedback = ""  # Clear feedback only when loading a new question
+        st.session_state.answered = False
+    else:
+        st.session_state.completed_symbols.add(st.session_state.current_symbol)
+        select_new_symbol()
 
 # Start/Reset Quiz Button
 if st.button("Start/Reset Quiz"):
@@ -106,13 +104,16 @@ if st.button("Start/Reset Quiz"):
 # Apply custom CSS for button colors
 st.markdown("""
     <style>
-        .positive-button {
-            background-color: green !important;
-            color: white !important;
+        .stButton > button:first-child {
+            width: 100px;
         }
-        .negative-button {
-            background-color: red !important;
-            color: white !important;
+        .positive-button button {
+            background-color: #4CAF50; /* Green */
+            color: white;
+        }
+        .negative-button button {
+            background-color: #f44336; /* Red */
+            color: white;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -125,10 +126,25 @@ if st.session_state.started:
 
         # Display answer buttons for the feature only if it hasn't been answered yet
         if not st.session_state.answered:
-            col1, col2 = st.columns([1, 1])
+            col1, col2 = st.columns(2)
             with col1:
-                if st.button(f"[+{st.session_state.current_feature}]", key="positive", help="Positive Feature", use_container_width=True, on_click=lambda: check_answer('+')):
-                    st.session_state.feedback = check_answer('+')
+                if st.button(f"[+{st.session_state.current_feature}]", key="positive", help="Positive Feature", use_container_width=True):
+                    check_answer('+')
             with col2:
-                if st.button(f"[-{st.session_state.current_feature}]", key="negative", help="Negative Feature", use_container_width=True, on_click=lambda: check_answer('-')):
-                    st.session_state.feedback = check_answer('-')
+                if st.button(f"[-{st.session_state.current_feature}]", key="negative", help="Negative Feature", use_container_width=True):
+                    check_answer('-')
+
+        # Display feedback
+        if st.session_state.feedback:
+            st.write(st.session_state.feedback)
+
+        # Display score and attempts
+        st.write(f"Score: {st.session_state.score}")
+        st.write(f"Attempts: {st.session_state.attempts}")
+
+        # Button to proceed to the next feature or symbol
+        if st.session_state.answered:
+            if st.button("Next Feature / Symbol"):
+                load_next_feature()  # Call load_next_feature to immediately update the question
+    else:
+        st.write("You've completed all the symbols!")
