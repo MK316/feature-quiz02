@@ -1,5 +1,6 @@
 import streamlit as st
 import random
+
 # IPA features dictionary with full feature names
 ipa_features = {
     'p': {'syllabic': '-', 'consonantal': '+', 'sonorant': '-', 'coronal': '-', 'anterior': '+', 'continuant': '-', 'nasal': '-', 'strident': '-', 'lateral': '-', 'delayed release': '-', 'voice': '-'},
@@ -47,6 +48,8 @@ if 'remaining_features' not in st.session_state:
     st.session_state.remaining_features = []
 if 'answered' not in st.session_state:
     st.session_state.answered = False
+if 'next_requested' not in st.session_state:
+    st.session_state.next_requested = False
 
 # Function to start or reset the quiz
 def start_quiz():
@@ -56,6 +59,7 @@ def start_quiz():
     st.session_state.completed_symbols = set()
     st.session_state.feedback = ""
     st.session_state.answered = False
+    st.session_state.next_requested = False
     select_new_symbol()
 
 # Function to select a new symbol and reset its features
@@ -83,15 +87,18 @@ def check_answer(user_choice):
             st.session_state.feedback = "😓 Oh, no!"
         st.session_state.answered = True
 
-# Function to load the next feature or symbol in one click
+# Function to load the next feature or symbol in a single click
 def load_next_feature():
-    if st.session_state.remaining_features:
-        st.session_state.current_feature = st.session_state.remaining_features.pop(0)
-        st.session_state.feedback = ""  # Clear feedback only when loading a new question
-        st.session_state.answered = False
-    else:
-        st.session_state.completed_symbols.add(st.session_state.current_symbol)
-        select_new_symbol()
+    # Proceed only if a next feature is requested and the answer has been reviewed
+    if st.session_state.next_requested:
+        if st.session_state.remaining_features:
+            st.session_state.current_feature = st.session_state.remaining_features.pop(0)
+            st.session_state.feedback = ""  # Clear feedback only when loading a new question
+            st.session_state.answered = False
+            st.session_state.next_requested = False  # Reset next request
+        else:
+            st.session_state.completed_symbols.add(st.session_state.current_symbol)
+            select_new_symbol()
 
 # Start/Reset Quiz Button
 if st.button("Start/Reset Quiz"):
@@ -124,6 +131,7 @@ if st.session_state.started:
         # Button to proceed to the next feature or symbol
         if st.session_state.answered:
             if st.button("Next Feature / Symbol"):
-                load_next_feature()  # Call load_next_feature on a single click
+                st.session_state.next_requested = True  # Mark next feature request
+                load_next_feature()  # Call load_next_feature to immediately update the question
     else:
         st.write("You've completed all the symbols!")
