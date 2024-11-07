@@ -29,11 +29,11 @@ ipa_features = {
     'w': {'syllabic': '-', 'consonantal': '-', 'sonorant': '+', 'coronal': '-', 'anterior': '-', 'continuant': '+', 'nasal': '-', 'strident': '-', 'lateral': '-', 'delayed release': '-', 'voice': '+'}
 }
 
-
-
 # Initialize session state variables
 if 'started' not in st.session_state:
     st.session_state.started = False
+if 'user_name' not in st.session_state:
+    st.session_state.user_name = ""
 if 'current_symbol' not in st.session_state:
     st.session_state.current_symbol = None
 if 'current_feature' not in st.session_state:
@@ -59,6 +59,7 @@ def start_quiz():
     st.session_state.completed_symbols = set()
     st.session_state.feedback = ""
     st.session_state.answered = False
+    st.session_state.user_name = st.session_state.user_name_input
     select_new_symbol()
 
 # Function to select a new symbol and reset its features
@@ -86,12 +87,15 @@ def check_answer(user_choice):
             st.session_state.feedback = "😓 Oh, no!"
         st.session_state.answered = True  # Mark this feature as answered
 
+# Input for user name
+st.session_state.user_name_input = st.text_input("Enter your name", value=st.session_state.user_name, placeholder="Type your name here...")
+
 # Start/Reset Quiz Button
 if st.button("Start/Reset Quiz"):
     start_quiz()
 
 # Quiz flow
-if st.session_state.started:
+if st.session_state.started and st.session_state.user_name:
     # Check if there are symbols left to practice
     if st.session_state.current_symbol:
         st.markdown(f"### 🍃 Q: Feature [ {st.session_state.current_feature} ] of / {st.session_state.current_symbol} /?")
@@ -110,14 +114,14 @@ if st.session_state.started:
         if st.session_state.feedback:
             st.write(st.session_state.feedback)
 
-        # Display score and attempts
-        st.write(f"Score: {st.session_state.score}")
+        # Display score and attempts with the user's name
+        st.write(f"{st.session_state.user_name}'s Score: {st.session_state.score}")
         st.write(f"Attempts: {st.session_state.attempts}")
 
         # Button to proceed to the next feature or symbol
         if st.session_state.answered:
             if st.session_state.remaining_features:
-                if st.button("➡️ Next Symbol"):
+                if st.button("➡️ Next Feature"):
                     st.session_state.current_feature = st.session_state.remaining_features.pop(0)
                     st.session_state.feedback = ""
                     st.session_state.answered = False  # Reset answered flag for the new feature
