@@ -100,6 +100,23 @@ def load_next_feature():
             st.session_state.completed_symbols.add(st.session_state.current_symbol)
             select_new_symbol()
 
+# Function to create styled buttons with custom colors
+def create_button(label, color, action):
+    button_html = f"""
+    <button style="
+        background-color: {color}; 
+        color: white; 
+        padding: 10px 20px; 
+        margin: 5px; 
+        border: none; 
+        border-radius: 5px; 
+        cursor: pointer;
+        font-size: 16px;
+    ">{label}</button>
+    """
+    if st.markdown(button_html, unsafe_allow_html=True):
+        action()
+
 # Start/Reset Quiz Button
 if st.button("Start/Reset Quiz"):
     start_quiz()
@@ -112,12 +129,12 @@ if st.session_state.started:
 
         # Display answer buttons for the feature only if it hasn't been answered yet
         if not st.session_state.answered:
-            col1, col2, _ = st.columns([2, 2, 4])  # Reduce spacing between the columns by adjusting column widths
+            col1, col2 = st.columns([1, 1])
             with col1:
-                if st.button(f"[+{st.session_state.current_feature}]"):
+                if st.markdown(f'<a href="javascript:void(0)" onclick="window.location.reload();"><button style="background-color: green; color: white; padding: 10px; border: none; border-radius: 5px;">[+{st.session_state.current_feature}]</button></a>', unsafe_allow_html=True):
                     check_answer('+')
             with col2:
-                if st.button(f"[-{st.session_state.current_feature}]"):
+                if st.markdown(f'<a href="javascript:void(0)" onclick="window.location.reload();"><button style="background-color: red; color: white; padding: 10px; border: none; border-radius: 5px;">[-{st.session_state.current_feature}]</button></a>', unsafe_allow_html=True):
                     check_answer('-')
 
         # Display feedback
