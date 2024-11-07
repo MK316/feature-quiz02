@@ -101,19 +101,22 @@ def load_next_feature():
 if st.button("Start/Reset Quiz"):
     start_quiz()
 
-# Apply custom CSS for button colors
+# Apply custom CSS for button colors and styling to prevent text wrapping
 st.markdown("""
     <style>
-        .stButton > button:first-child {
-            width: 100px;
+        .stButton > button {
+            width: 150px !important;  /* Increase width to fit text */
+            font-size: 14px !important;  /* Adjust font size */
+            padding: 5px 10px !important;  /* Add padding */
+            white-space: nowrap;  /* Prevent text wrapping */
         }
         .positive-button button {
-            background-color: #4CAF50; /* Green */
-            color: white;
+            background-color: #4CAF50 !important; /* Green */
+            color: white !important;
         }
         .negative-button button {
-            background-color: #f44336; /* Red */
-            color: white;
+            background-color: #f44336 !important; /* Red */
+            color: white !important;
         }
     </style>
 """, unsafe_allow_html=True)
