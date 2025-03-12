@@ -93,7 +93,7 @@ st.session_state.user_name_input = st.text_input("Enter your name", value=st.ses
 # Start/Reset Quiz Button
 if st.button("Start/Reset Quiz"):
     start_quiz()
-st.info("😥 Current issue: You need to click 'Next' button two times to display.")
+st.info("😥 Current issue: You need to click 'Next' button two times to display the next question.")
 # Quiz flow
 if st.session_state.started and st.session_state.user_name:
     # Check if there are symbols left to practice
